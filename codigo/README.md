@@ -107,6 +107,21 @@ simultáneas. No elimine esos límites ni repita la carga innecesariamente. Esta
 actividad genera datos para CloudWatch; no pretende medir el rendimiento máximo
 de AWS Lambda.
 
+### Certificados TLS en Ubuntu y otras distribuciones Linux
+
+El script busca automáticamente un almacén de certificados CA válido. En Ubuntu
+y Debian detecta normalmente `/etc/ssl/certs/ca-certificates.crt`, aunque la
+instalación de Python tenga configurada una ruta diferente. La ruta seleccionada
+aparece al comenzar la ejecución.
+
+Si no existe ningún almacén conocido, el script conserva la verificación TLS y
+muestra el detalle del error de red. No desactive la verificación de certificados.
+Como diagnóstico temporal puede indicar una ruta válida mediante:
+
+```bash
+SSL_CERT_FILE=/ruta/al/ca-bundle.crt python3 carga_controlada.py "https://SU-FUNCTION-URL/"
+```
+
 ## 4. Interpretar el resumen y CloudWatch
 
 El resumen local muestra:

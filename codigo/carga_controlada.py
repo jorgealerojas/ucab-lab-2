@@ -7,6 +7,8 @@ invocaciones para observar métricas y logs durante el laboratorio.
 import argparse
 import json
 import math
+import os
+import ssl
 import statistics
 import time
 from collections import Counter
@@ -18,6 +20,29 @@ from urllib.request import Request, urlopen
 
 MAX_SOLICITUDES = 200
 MAX_CONCURRENCIA = 10
+
+
+def crear_contexto_ssl():
+    """Crea un contexto TLS y localiza el almacén CA común de Linux si hace falta."""
+    rutas = ssl.get_default_verify_paths()
+    candidatos = (
+        os.environ.get("SSL_CERT_FILE"),
+        rutas.cafile,
+        "/etc/ssl/certs/ca-certificates.crt",  # Ubuntu y Debian
+        "/etc/pki/tls/certs/ca-bundle.crt",  # Fedora, RHEL y derivados
+        "/etc/ssl/ca-bundle.pem",  # openSUSE
+        "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem",
+    )
+
+    for ruta in candidatos:
+        if ruta and os.path.isfile(ruta):
+            return ssl.create_default_context(cafile=ruta), ruta
+
+    # Windows y macOS pueden usar el almacén del sistema aunque no expongan cafile.
+    return ssl.create_default_context(), None
+
+
+CONTEXTO_SSL, RUTA_CA = crear_contexto_ssl()
 
 
 def entero_en_rango(nombre, minimo, maximo):
@@ -57,9 +82,10 @@ def invocar(url_base, numero, timeout):
     url = f"{url_base}{separador}{urlencode(parametros)}"
     solicitud = Request(url, headers={"User-Agent": "UCAB-Laboratorio-Cloud/1.0"})
     inicio = time.perf_counter()
+    detalle_error = None
 
     try:
-        with urlopen(solicitud, timeout=timeout) as respuesta:
+        with urlopen(solicitud, timeout=timeout, context=CONTEXTO_SSL) as respuesta:
             cuerpo = respuesta.read().decode("utf-8", errors="replace")
             status = respuesta.status
         error_red = None
@@ -72,7 +98,8 @@ def invocar(url_base, numero, timeout):
         cuerpo = ""
         status = None
         error_red = type(error).__name__
-
+        causa = getattr(error, "reason", error)
+        detalle_error = f"{type(causa).__name__}: {causa}"
     latencia_ms = (time.perf_counter() - inicio) * 1000
     json_valido = False
     if cuerpo:
@@ -86,6 +113,7 @@ def invocar(url_base, numero, timeout):
         "status": status,
         "latencia_ms": latencia_ms,
         "error_red": error_red,
+        "detalle_error": detalle_error,
         "json_valido": json_valido,
         "caso_valido": era_valida,
     }
@@ -131,6 +159,12 @@ def imprimir_resumen(resultados, duracion_total):
     print(f"Respuestas que no eran JSON: {cuerpos_no_json}")
     if errores_red:
         print("Errores de red: " + ", ".join(f"{tipo}={total}" for tipo, total in errores_red.items()))
+        primer_detalle = next(
+            (resultado["detalle_error"] for resultado in resultados if resultado["detalle_error"]),
+            None,
+        )
+        if primer_detalle:
+            print(f"Primer detalle de red: {primer_detalle}")
     else:
         print("Errores de red: 0")
 
@@ -170,6 +204,8 @@ def main():
         f"Iniciando {args.solicitudes} solicitudes con "
         f"concurrencia {args.concurrencia}."
     )
+    if RUTA_CA:
+        print(f"Certificados TLS: {RUTA_CA}")
     print("Esta es una demostración controlada, no una prueba de estrés.")
     inicio = time.perf_counter()
     resultados = []
@@ -187,4 +223,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

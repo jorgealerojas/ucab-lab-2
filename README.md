@@ -18,13 +18,17 @@ Laboratorio introductorio de AWS para estudiantes de Ingeniería Informática. D
 
 ## Configuración del laboratorio
 
-- Región: `us-east-1`.
+- Región: `us-east-2`.
 - Nombre de la función: `ucab-flash-sale-<iniciales>`.
 - Runtime: una versión disponible y mantenida de Python.
 - Memoria: 128 MB.
 - Timeout: 3 segundos.
 - Function URL: pública con `AuthType: NONE` solamente durante la práctica.
 - Carga indicada: 50 solicitudes con concurrencia 5.
+
+El script de carga utiliza solamente la biblioteca estándar de Python y detecta
+automáticamente las ubicaciones habituales del almacén CA, incluida la ruta de
+Ubuntu y Debian.
 
 ## Inicio
 

@@ -4,7 +4,7 @@
 **Duración:** 1 h 45 min  
 **Modalidad:** individual  
 **Servicios:** AWS Lambda, Lambda Function URL, AWS Identity and Access Management (IAM) y Amazon CloudWatch  
-**Región obligatoria:** `us-east-1` (N. Virginia)
+**Región obligatoria:** `us-east-2` (Ohio)
 
 > Los nombres y la ubicación exacta de algunas opciones pueden variar ligeramente entre las versiones en español e inglés de la consola. No cambies de región durante el laboratorio.
 
@@ -53,7 +53,7 @@ No necesitas instalar AWS CLI, crear una VPC ni usar una tarjeta de crédito par
 
 Cumple estas reglas durante toda la sesión:
 
-- Trabaja únicamente en `us-east-1`.
+- Trabaja únicamente en `us-east-2`.
 - Crea **una sola función**, con **128 MB** de memoria y **3 segundos** de timeout.
 - Ejecuta como máximo **100 solicitudes** con el script de carga.
 - No actives Lambda Insights, X-Ray, Live Tail, alarmas, dashboards personalizados, provisioned concurrency ni otros servicios.
@@ -82,7 +82,7 @@ Aunque el consumo previsto es mínimo, “Free Plan” no significa que cualquie
 
 1. Inicia sesión en la consola de AWS con tu cuenta individual.
 2. Comprueba en la sección de facturación o información de la cuenta que permaneces en el **Free Plan**. No selecciones ninguna opción para pasar a un plan pago.
-3. En el selector de región de la barra superior, elige **US East (N. Virginia) `us-east-1`**.
+3. En el selector de región de la barra superior, elige **US East (Ohio) `us-east-2`**.
 4. Anota tus iniciales en minúsculas, sin espacios ni acentos. Ejemplo: Ana Pérez Gómez usaría `apg`.
 5. Define el nombre que emplearás en toda la práctica:
 
@@ -97,7 +97,7 @@ Aunque el consumo previsto es mínimo, “Free Plan” no significa que cualquie
 ## 7. Parte B — Crear la función Lambda
 
 1. En el buscador superior de servicios escribe **Lambda** y abre el servicio.
-2. Confirma nuevamente que la región superior sea `us-east-1`.
+2. Confirma nuevamente que la región superior sea `us-east-2`.
 3. Abre **Functions / Funciones** y selecciona **Create function / Crear función**.
 4. Selecciona **Author from scratch / Crear desde cero**.
 5. Completa la información básica:
@@ -200,7 +200,7 @@ La URL será pública solamente durante el laboratorio.
 9. Copia la URL generada en un archivo temporal de notas. Debe parecerse a:
 
    ```text
-   https://<identificador>.lambda-url.us-east-1.on.aws/
+   https://<identificador>.lambda-url.us-east-2.on.aws/
    ```
 
 **No incluyas la URL completa en una entrega pública.** Puedes mostrarla parcialmente oculta en una captura, si el docente solicita evidencia visual.
@@ -212,7 +212,7 @@ La URL será pública solamente durante el laboratorio.
 En la barra del navegador, agrega los parámetros a tu Function URL:
 
 ```text
-https://<tu-url>.lambda-url.us-east-1.on.aws/?producto=teclado&cantidad=3&precio=25
+https://<tu-url>.lambda-url.us-east-2.on.aws/?producto=teclado&cantidad=3&precio=25
 ```
 
 Comprueba que:
@@ -222,7 +222,7 @@ Comprueba que:
 - La cantidad sea `3`.
 - El precio unitario sea `25`.
 - El subtotal sea `75`.
-- La región informada sea `us-east-1`.
+- La región informada sea `us-east-2`.
 
 ### Pruebas inválidas
 
@@ -256,13 +256,13 @@ La finalidad no es medir el límite de AWS ni realizar una prueba profesional de
 3. Ejecuta el siguiente comando, sustituyendo la URL de ejemplo por tu Function URL. Conserva las comillas:
 
    ```bash
-   python3 codigo/carga_controlada.py "https://<tu-url>.lambda-url.us-east-1.on.aws/" --solicitudes 50 --concurrencia 5
+   python3 codigo/carga_controlada.py "https://<tu-url>.lambda-url.us-east-2.on.aws/" --solicitudes 50 --concurrencia 5
    ```
 
    En Windows:
 
    ```powershell
-   py codigo/carga_controlada.py "https://<tu-url>.lambda-url.us-east-1.on.aws/" --solicitudes 50 --concurrencia 5
+   py codigo/carga_controlada.py "https://<tu-url>.lambda-url.us-east-2.on.aws/" --solicitudes 50 --concurrencia 5
    ```
 
    El programa intercala algunos casos inválidos para verificar las respuestas `400`; no superes 100 solicitudes ni aumentes la concurrencia indicada.
@@ -270,6 +270,16 @@ La finalidad no es medir el límite de AWS ni realizar una prueba profesional de
 5. Si todas fallan, detén la prueba; no aumentes el número de solicitudes. Revisa primero la URL y una invocación manual.
 
 > No instales herramientas de carga adicionales. El script provisto usa la biblioteca estándar de Python y limita la concurrencia.
+
+### Verificación TLS y certificados CA
+
+El script detecta automáticamente el almacén de certificados CA del sistema. En Ubuntu y Debian suele utilizar `/etc/ssl/certs/ca-certificates.crt`; la ruta detectada se muestra al iniciar. La verificación TLS permanece activa en todo momento.
+
+Si aparece `URLError`, revisa el primer detalle de red que imprime el programa. No desactives la validación de certificados. Si el sistema utiliza una ubicación no detectada, puedes indicar temporalmente una ruta válida con la variable `SSL_CERT_FILE`:
+
+```bash
+SSL_CERT_FILE=/ruta/al/ca-bundle.crt python3 codigo/carga_controlada.py "https://<tu-url>.lambda-url.us-east-2.on.aws/" --solicitudes 50 --concurrencia 5
+```
 
 ## 13. Parte H — Explorar CloudWatch
 
@@ -391,7 +401,7 @@ No elimines roles que no puedas asociar inequívocamente con esta práctica.
 
 | Problema | Causa probable | Acción |
 |---|---|---|
-| No aparece la opción Function URL | Región incorrecta o vista equivocada | Confirma `us-east-1` y abre la pestaña **Configuration** de la función |
+| No aparece la opción Function URL | Región incorrecta o vista equivocada | Confirma `us-east-2` y abre la pestaña **Configuration** de la función |
 | La consola muestra el código anterior | El cambio no fue desplegado | Selecciona **Deploy** y vuelve a invocar |
 | `Internal Server Error` | Excepción no controlada o formato de evento inesperado | Revisa el flujo más reciente de CloudWatch y compara el evento con los ejemplos del archivo |
 | Respuesta de validación en todas las pruebas | Parámetros ausentes, nombres distintos o URL mal formada | Usa exactamente `producto`, `cantidad` y `precio`; conserva `?` y `&` |
@@ -400,6 +410,7 @@ No elimines roles que no puedas asociar inequívocamente con esta práctica.
 | Las métricas aparecen vacías | Periodo o intervalo incorrecto, o retraso de publicación | Selecciona el intervalo de la clase, espera 2–5 minutos y actualiza |
 | El script no reconoce `python3` | En Windows el lanzador suele ser `py` | Ejecuta `py codigo/carga_controlada.py --help` |
 | Muchas solicitudes fallan | URL eliminada, error de código o conectividad | Detén la carga, prueba una sola solicitud en el navegador y consulta logs |
+| Todas aparecen como `URLError` | Python no encontró un almacén CA válido o existe un problema de red | Lee el primer detalle impreso; en Ubuntu confirma que exista `/etc/ssl/certs/ca-certificates.crt` |
 | El subtotal es incorrecto | Conversión numérica o versión no desplegada | Revisa los tipos, vuelve a desplegar y repite la prueba válida |
 
 ## 18. Cierre
