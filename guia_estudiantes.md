@@ -65,20 +65,7 @@ Cumple estas reglas durante toda la sesión:
 
 Aunque el consumo previsto es mínimo, “Free Plan” no significa que cualquier recurso o volumen de uso sea ilimitado. El control principal de este laboratorio es el alcance anterior y la eliminación final de los recursos.
 
-## 5. Cronograma de trabajo
-
-| Minutos | Actividad |
-|---:|---|
-| 0–10 | Verificar cuenta, plan y región |
-| 10–25 | Crear y configurar la función |
-| 25–45 | Pegar el código, desplegarlo y probar desde la consola |
-| 45–60 | Crear y probar la Function URL |
-| 60–75 | Ejecutar pruebas funcionales y carga controlada |
-| 75–90 | Examinar logs y métricas |
-| 90–98 | Analizar arquitectura y características NIST |
-| 98–105 | Guardar evidencias y eliminar recursos |
-
-## 6. Parte A — Verificar la cuenta y la región
+## 5. Parte A — Verificar la cuenta y la región
 
 1. Inicia sesión en la consola de AWS con tu cuenta individual.
 2. Comprueba en la sección de facturación o información de la cuenta que permaneces en el **Free Plan**. No selecciones ninguna opción para pasar a un plan pago.
@@ -94,7 +81,7 @@ Aunque el consumo previsto es mínimo, “Free Plan” no significa que cualquie
 
 > Si dos estudiantes comparten accidentalmente una cuenta, agreguen un número corto al final. La modalidad esperada es una cuenta por estudiante.
 
-## 7. Parte B — Crear la función Lambda
+## 6. Parte B — Crear la función Lambda
 
 1. En el buscador superior de servicios escribe **Lambda** y abre el servicio.
 2. Confirma nuevamente que la región superior sea `us-east-2`.
@@ -112,7 +99,7 @@ Aunque el consumo previsto es mínimo, “Free Plan” no significa que cualquie
 
 AWS creó la función y un rol de ejecución de IAM. Ese rol permite, entre otras acciones básicas, escribir los logs de la función en CloudWatch. No concede acceso general a todos los servicios.
 
-### Configurar memoria y timeout
+### Configurar memoria y timeout (posiblemente ya esto esté configurado por defecto)
 
 1. Dentro de la función, abre **Configuration / Configuración**.
 2. En **General configuration / Configuración general**, selecciona **Edit / Editar**.
@@ -122,7 +109,7 @@ AWS creó la función y un rol de ejecución de IAM. Ese rol permite, entre otra
 4. Guarda los cambios.
 5. Comprueba que no esté activada la concurrencia aprovisionada (*provisioned concurrency*).
 
-## 8. Parte C — Instalar y desplegar el código
+## 7. Parte C — Instalar y desplegar el código
 
 1. Regresa a la pestaña **Code / Código**.
 2. En el editor integrado, abre `lambda_function.py`.
@@ -134,7 +121,7 @@ AWS creó la función y un rol de ejecución de IAM. Ese rol permite, entre otra
 
 No renombres `lambda_function.py` ni la función `lambda_handler`, pues el handler predeterminado espera `lambda_function.lambda_handler`.
 
-## 9. Parte D — Primera prueba desde la consola
+## 8. Parte D — Primera prueba desde la consola
 
 Esta prueba invoca Lambda desde el plano de control de AWS, sin publicar todavía un endpoint.
 
@@ -185,7 +172,7 @@ Debe producir una respuesta controlada con `statusCode` igual a `400`, pues la c
 
 > Una respuesta HTTP controlada `400` no necesariamente incrementa la métrica **Errors** de Lambda. Para Lambda, el código terminó correctamente si el handler capturó el problema y devolvió una respuesta. La métrica **Errors** registra, entre otros casos, excepciones no controladas y fallas del runtime.
 
-## 10. Parte E — Crear una Function URL temporal
+## 9. Parte E — Crear una Function URL temporal
 
 La URL será pública solamente durante el laboratorio.
 
@@ -205,7 +192,7 @@ La URL será pública solamente durante el laboratorio.
 
 **No incluyas la URL completa en una entrega pública.** Puedes mostrarla parcialmente oculta en una captura, si el docente solicita evidencia visual.
 
-## 11. Parte F — Pruebas funcionales por HTTPS
+## 10. Parte F — Pruebas funcionales por HTTPS
 
 ### Prueba válida
 
@@ -241,7 +228,7 @@ Registra para cada una el código o mensaje de error y explica qué validación 
 
 ¿Por qué el navegador puede invocar el servicio sin iniciar sesión en AWS? Relaciona tu respuesta con `AuthType: NONE` y con el acceso por red.
 
-## 12. Parte G — Carga controlada
+## 11. Parte G — Carga controlada
 
 La finalidad no es medir el límite de AWS ni realizar una prueba profesional de rendimiento. Solo se generarán suficientes invocaciones para observar medición y concurrencia básica.
 
@@ -281,7 +268,7 @@ Si aparece `URLError`, revisa el primer detalle de red que imprime el programa. 
 SSL_CERT_FILE=/ruta/al/ca-bundle.crt python3 codigo/carga_controlada.py "https://<tu-url>.lambda-url.us-east-2.on.aws/" --solicitudes 50 --concurrencia 5
 ```
 
-## 13. Parte H — Explorar CloudWatch
+## 12. Parte H — Explorar CloudWatch
 
 Los datos pueden tardar algunos minutos en aparecer. Aprovecha ese intervalo para completar las preguntas conceptuales.
 
@@ -322,7 +309,7 @@ No concluyas que cada *log stream* es un servidor físico. Un flujo se asocia a 
 
 No se espera que el gráfico coincida exactamente con 50: también realizaste invocaciones desde la consola y el navegador, y las métricas se agregan por periodos.
 
-## 14. Parte I — Análisis de fundamentos de cloud
+## 13. Parte I — Análisis de fundamentos de cloud
 
 Completa la tabla con una evidencia concreta de tu práctica. En “limitación”, indica qué no pudiste observar o demostrar directamente.
 
@@ -343,41 +330,39 @@ Responde además, con dos o tres oraciones por pregunta:
 5. ¿La ráfaga de 50 solicitudes demuestra por sí sola elasticidad ilimitada? Justifica.
 6. ¿Qué riesgo introdujo `AuthType: NONE` y cómo se reduciría en un sistema real?
 
-## 15. Entregables
+## 14. Entregables
 
 Entrega un único informe breve con:
 
-1. Tu nombre, iniciales usadas y nombre de la función.
-2. El código final de `lambda_function.py` o un enlace al repositorio indicado por el docente.
-3. Resultado de una solicitud válida con subtotal correcto.
-4. Resultados de dos solicitudes inválidas y explicación de sus validaciones.
-5. Resumen de la carga controlada.
-6. Evidencia de CloudWatch Logs donde se vean `RequestId`, `Duration` y uso de memoria. Oculta identificadores sensibles innecesarios.
-7. Datos o gráfico de las métricas Invocations, Errors y Duration.
-8. Diagrama de arquitectura sencillo, con cliente, Function URL, Lambda, IAM y CloudWatch.
-9. Tabla NIST completa y respuestas de análisis.
-10. Confirmación escrita de que eliminaste la Function URL, la función y el grupo de logs.
+1. Resultado de una solicitud válida con subtotal correcto.
+2. Resultados de dos solicitudes inválidas y explicación de sus validaciones.
+3. Resumen de la carga controlada.
+4. Evidencia de CloudWatch Logs donde se vean `RequestId`, `Duration` y uso de memoria. Oculta identificadores sensibles innecesarios.
+5. Datos o gráfico de las métricas Invocations, Errors y Duration.
+6. Diagrama de arquitectura sencillo, con cliente, Function URL, Lambda, IAM y CloudWatch.
+7. Tabla NIST completa y respuestas de análisis.
+8. Confirmación escrita de que eliminaste la Function URL, la función y el grupo de logs.
 
-No publiques la Function URL ni credenciales en el informe.
+No publiques la Function URL ni credenciales en el informe. Cada paso debe tener sus capturas de pantalla.
 
 ## 16. Limpieza obligatoria
 
 Realiza esta sección antes de cerrar la sesión, incluso si no terminaste las preguntas.
 
-### 16.1 Eliminar primero la URL pública
+### 15.1 Eliminar primero la URL pública
 
 1. Abre **Lambda > Functions > `ucab-flash-sale-<iniciales>`**.
 2. Abre **Configuration > Function URL**.
 3. Selecciona **Delete / Eliminar** y confirma.
 4. Prueba la URL una vez más: ya no debe responder como antes.
 
-### 16.2 Eliminar la función
+### 15.2 Eliminar la función
 
 1. Vuelve a la página de la función.
 2. Selecciona **Actions / Acciones > Delete function / Eliminar función**.
 3. Escribe la confirmación solicitada por AWS y elimina la función.
 
-### 16.3 Eliminar el grupo de logs
+### 15.3 Eliminar el grupo de logs
 
 Eliminar la función no necesariamente elimina sus logs existentes.
 
@@ -386,7 +371,7 @@ Eliminar la función no necesariamente elimina sus logs existentes.
 3. Selecciona exclusivamente ese grupo.
 4. Elige **Actions > Delete log group(s) / Eliminar grupos de logs** y confirma.
 
-### 16.4 Rol de IAM
+### 15.4 Rol de IAM
 
 Si el docente lo indica, elimina también el rol creado automáticamente:
 
@@ -397,7 +382,7 @@ Si el docente lo indica, elimina también el rol creado automáticamente:
 
 No elimines roles que no puedas asociar inequívocamente con esta práctica.
 
-## 17. Solución de problemas
+## 16. Solución de problemas
 
 | Problema | Causa probable | Acción |
 |---|---|---|
@@ -413,7 +398,7 @@ No elimines roles que no puedas asociar inequívocamente con esta práctica.
 | Todas aparecen como `URLError` | Python no encontró un almacén CA válido o existe un problema de red | Lee el primer detalle impreso; en Ubuntu confirma que exista `/etc/ssl/certs/ca-certificates.crt` |
 | El subtotal es incorrecto | Conversión numérica o versión no desplegada | Revisa los tipos, vuelve a desplegar y repite la prueba válida |
 
-## 18. Cierre
+## 17. Cierre
 
 Antes de entregar, verifica:
 
